@@ -1,6 +1,7 @@
 package filmprocessingservice;
 
 public class Client {
+	
 	private long id;
 	private String email;
 	private String phoneNumber;
