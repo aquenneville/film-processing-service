@@ -19,8 +19,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `photoddb`
 --
-CREATE DATABASE IF NOT EXISTS `photoddb` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
-USE `photoddb`;
+CREATE DATABASE IF NOT EXISTS `film-processing-service-db@env` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE `film-processing-service-db@env`;
 
 -- --------------------------------------------------------
 
@@ -68,8 +68,8 @@ CREATE TABLE `client_tier` (
 CREATE TABLE `client_account` (
   `id` int(10) UNSIGNED NOT NULL,
   `client_id` int(10) UNSIGNED NOT NULL,
-  `work_order_result_id` int(10) UNSIGNED NOT NULL,
-  `deposit` int(10) UNSIGNED NOT NULL
+  `invoice_id` int(10) UNSIGNED NOT NULL,
+  `deposit` DECIMAL(3,2) UNSIGNED NOT NULL
   `payment` int(10) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -82,7 +82,7 @@ CREATE TABLE `client_account` (
 CREATE TABLE `invoice` (
   `id` int(10) UNSIGNED NOT NULL,
   `work_order_id` int(10) UNSIGNED NOT NULL,
-  `amount` float UNSIGNED NOT NULL
+  `amount` DECIMAL(4,2) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -119,7 +119,7 @@ CREATE TABLE `payment` (
   `client_id` int(10) UNSIGNED NOT NULL,
   `work_order_id` int(10) UNSIGNED NOT NULL,
   `payment_date` datetime NOT NULL,
-  `amount` int(11) NOT NULL
+  `amount` DECIMAL(4,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -134,10 +134,11 @@ CREATE TABLE `work_order` (
   `notes` varchar(254) DEFAULT NULL,
   `assignee_name` varchar(50) DEFAULT NULL,
   `roll_quantity` int(10) UNSIGNED NOT NULL,
-  `paper_size_id` int(10) UNSIGNED NOT NULL,
-  `quantity_each_print` int(10) UNSIGNED NOT NULL,
+  `paper_size_id` int(10) UNSIGNED NOT NULL,  
   `paper_type_id` int(10) UNSIGNED NOT NULL,
-  `date` int(11) NOT NULL
+  `quantity_each_print` int(10) UNSIGNED NOT NULL,
+  `date` DATETIME NOT NULL, 
+  `enveloppe_uid` varchar(254) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -150,7 +151,7 @@ CREATE TABLE `work_order_result` (
   `id` int(10) UNSIGNED NOT NULL,
   `work_order_id` int(10) UNSIGNED NOT NULL,
   `negative_quantity` int(10) UNSIGNED NOT NULL,
-  `print_number` int(10) UNSIGNED NOT NULL
+  `print_total` int(10) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -159,9 +160,9 @@ CREATE TABLE `work_order_result` (
 -- Table structure for table `work_order_status`
 --
 
-CREATE TABLE `work_order_status` (
+CREATE TABLE `work_order_state` (
   `id` int(10) UNSIGNED NOT NULL,
-  `value` varchar(254) CHARACTER SET utf8 NOT NULL
+  `value` varchar(254) CHARACTER SET utf8 NOT NULL   
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -173,8 +174,8 @@ CREATE TABLE `work_order_status` (
 CREATE TABLE `work_order_tracking` (
   `id` int(10) UNSIGNED NOT NULL,
   `work_order_id` int(10) UNSIGNED NOT NULL,
-  `work_order_status_id` int(10) UNSIGNED NOT NULL,
-  `date_state` datetime NOT NULL
+  `work_order_state_id` int(10) UNSIGNED NOT NULL,
+  `state_changed` DATETIME NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -238,7 +239,7 @@ ALTER TABLE `work_order_result`
 --
 -- Indexes for table `work_order_status`
 --
-ALTER TABLE `work_order_status`
+ALTER TABLE `work_order_state`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `value` (`value`),
   ADD KEY `id` (`id`);
@@ -260,6 +261,12 @@ ALTER TABLE `work_order_tracking`
 --
 ALTER TABLE `client`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `client_account`
+--
+ALTER TABLE `client_account`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `client_type`
 --
@@ -274,7 +281,7 @@ ALTER TABLE `invoice`
 -- AUTO_INCREMENT for table `paper_size`
 --
 ALTER TABLE `paper_size`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `paper_type`
 --
@@ -298,7 +305,7 @@ ALTER TABLE `work_order_result`
 --
 -- AUTO_INCREMENT for table `work_order_status`
 --
-ALTER TABLE `work_order_status`
+ALTER TABLE `work_order_state`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `work_order_tracking`
